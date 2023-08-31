@@ -9,6 +9,9 @@ const App = () => {
   ]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [search, setSearch] = useState('')
+
+  const personsToShow = persons.filter(person => person.name.search(new RegExp(search, "i")) != -1)
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -34,9 +37,17 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value)
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
+      <div>
+        filter shown with <input value={search} onChange={handleSearchChange}/>
+      </div>
+      <h2>add new</h2>
       <form onSubmit={addPerson}>
         <div>
           name: <input value={newName} onChange={handleNameChange} />
@@ -49,7 +60,7 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-        {persons.map(person => 
+        {personsToShow.map(person => 
           <div key={person.id}>{person.name} {person.number}</div>
         )}
     </div>
