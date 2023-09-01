@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 
-const baseUrl = 'http://localhost:3001/persons'
+import Persons from './components/Persons'
+import PersonForm from './components/PersonForm'
+import Filter from './components/Filter'
+
+import phonebook from './services/phonebook'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -10,10 +13,10 @@ const App = () => {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    axios
-      .get(baseUrl)   
-      .then(response => {   
-        setPersons(response.data)      
+    phonebook
+      .getAll() 
+      .then(phonebookEntries => {
+        setPersons(phonebookEntries)
       })
   }, [])
 
@@ -30,10 +33,10 @@ const App = () => {
         number: newNumber
       }
 
-      axios
-        .post(baseUrl, newPerson)
+      phonebook
+        .create(newPerson)
         .then(response => {
-          setPersons(persons.concat(response.data))
+          setPersons(persons.concat(response))
         })
       setNewName('')
       setNewNumber('')
@@ -66,46 +69,6 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <Persons persons={personsToShow} />
-    </div>
-  )
-}
-
-const Persons = ({persons}) => {
-  return (
-    <div>
-      {persons.map(person => 
-        <Person key={person.id} person={person} />
-      )}
-    </div>
-  )
-}
-
-const Person = ({person}) => {
-  return (
-    <div>{person.name} {person.number}</div>
-  )
-}
-
-const PersonForm = (props) => {
-  return (
-    <form onSubmit={props.onSubmit}>
-    <div>
-      name: <input value={props.name} onChange={props.onNameChange} />
-    </div>
-    <div>
-      number: <input value = {props.number} onChange={props.onNumberChange} />
-    </div>
-    <div>
-      <button type="submit">add</button>
-    </div>
-    </form>
-  )
-}
-
-const Filter = (props) => {
-  return (
-    <div>
-      filter shown with <input value={props.value} onChange={props.onChange}/>
     </div>
   )
 }
