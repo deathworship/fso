@@ -34,7 +34,7 @@ const App = () => {
       }
 
       phonebook
-        .create(newPerson)
+        .createEntry(newPerson)
         .then(response => {
           setPersons(persons.concat(response))
         })
@@ -55,6 +55,20 @@ const App = () => {
     setSearch(event.target.value)
   }
 
+  const handleDeleteEntry = (id) => {
+    const person = persons.find(p => p.id === id)
+    if (confirm(`Delete ${person.name}?`)) {
+      phonebook
+        .deleteEntry(id)
+        .then(status => {
+          if (status === 200) {
+            setPersons(persons.filter(n => n.id !== id))
+          }
+        })
+    }
+
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -68,7 +82,7 @@ const App = () => {
         onNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} onDeleteEntry={handleDeleteEntry} />
     </div>
   )
 }
