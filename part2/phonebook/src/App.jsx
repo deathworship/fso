@@ -24,15 +24,31 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    if (persons.find((person) => person.name === newName) != undefined) {
-      alert(`${newName} is already added to phonebook`)
+    const found = persons.find((person) => person.name === newName)
+
+    if (found != undefined) {
+      if (found.number === newNumber) {
+        alert(`${newName} is already added to phonebook`)
+      }
+      else if (confirm(`${found.name} is already added to phonebook, replace the old number with a new one?`)){
+        const newPerson = {
+          name: found.name,
+          number: newNumber
+        }
+        phonebook
+          .updateNumber(found.id, newPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(p => p.id !== found.id ? p : returnedPerson))
+          })
+        setNewName('')
+        setNewNumber('')
+      }
     }
     else {
       const newPerson = {
         name: newName,
         number: newNumber
       }
-
       phonebook
         .createEntry(newPerson)
         .then(response => {
@@ -41,6 +57,20 @@ const App = () => {
       setNewName('')
       setNewNumber('')
     }
+  }
+
+  const deletePerson = (id) => {
+    const person = persons.find(p => p.id === id)
+    if (confirm(`Delete ${person.name}?`)) {
+      phonebook
+        .deleteEntry(id)
+        .then(status => {
+          if (status === 200) {
+            setPersons(persons.filter(n => n.id !== id))
+          }
+        })
+    }
+
   }
 
   const handleNameChange = (event) => {
@@ -53,20 +83,6 @@ const App = () => {
 
   const handleSearchChange = (event) => {
     setSearch(event.target.value)
-  }
-
-  const handleDeleteEntry = (id) => {
-    const person = persons.find(p => p.id === id)
-    if (confirm(`Delete ${person.name}?`)) {
-      phonebook
-        .deleteEntry(id)
-        .then(status => {
-          if (status === 200) {
-            setPersons(persons.filter(n => n.id !== id))
-          }
-        })
-    }
-
   }
 
   return (
@@ -82,7 +98,7 @@ const App = () => {
         onNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} onDeleteEntry={handleDeleteEntry} />
+      <Persons persons={personsToShow} onDeleteEntry={deletePerson} />
     </div>
   )
 }
