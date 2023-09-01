@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const baseUrl = 'http://localhost:3001/persons'
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
@@ -9,7 +11,7 @@ const App = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:3001/persons')   
+      .get(baseUrl)   
       .then(response => {   
         setPersons(response.data)      
       })
@@ -23,11 +25,16 @@ const App = () => {
       alert(`${newName} is already added to phonebook`)
     }
     else {
-      setPersons(persons.concat({
-         name: newName,
-         number: newNumber,
-         id: persons.length + 1
-        }))
+      const newPerson = {
+        name: newName,
+        number: newNumber
+      }
+
+      axios
+        .post(baseUrl, newPerson)
+        .then(response => {
+          setPersons(persons.concat(response.data))
+        })
       setNewName('')
       setNewNumber('')
     }
