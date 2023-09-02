@@ -47,6 +47,13 @@ const App = () => {
             setNewName('')
             setNewNumber('')
           })
+          .catch(error => {
+            setNotification({ type: 'error', message: `Information of ${found.name} has already been removed from server` })
+            setTimeout(() => {
+              setNotification(null)
+            }, 5000)
+            setPersons(persons.filter(p => p.id !== found.id))
+          })
       }
     }
     else {
@@ -75,7 +82,7 @@ const App = () => {
         .deleteEntry(id)
         .then(status => {
           if (status === 200) {
-            setPersons(persons.filter(n => n.id !== id))
+            setPersons(persons.filter(p => p.id !== id))
             setNotification({ type: 'info', message: `Removed ${person.name}` })
             setTimeout(() => {
               setNotification(null)
