@@ -11,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     phonebook
@@ -39,9 +40,13 @@ const App = () => {
           .updateNumber(found.id, newPerson)
           .then(returnedPerson => {
             setPersons(persons.map(p => p.id !== found.id ? p : returnedPerson))
+            setNotification({ type: 'info', message: `Changed number of ${found.name}` })
+            setTimeout(() => {
+              setNotification(null)
+            }, 5000)
+            setNewName('')
+            setNewNumber('')
           })
-        setNewName('')
-        setNewNumber('')
       }
     }
     else {
@@ -53,9 +58,13 @@ const App = () => {
         .createEntry(newPerson)
         .then(response => {
           setPersons(persons.concat(response))
+          setNotification({ type: 'info', message: `Added ${newName}` })
+          setTimeout(() => {
+            setNotification(null)
+          }, 5000)
+          setNewName('')
+          setNewNumber('')
         })
-      setNewName('')
-      setNewNumber('')
     }
   }
 
@@ -67,6 +76,10 @@ const App = () => {
         .then(status => {
           if (status === 200) {
             setPersons(persons.filter(n => n.id !== id))
+            setNotification({ type: 'info', message: `Removed ${person.name}` })
+            setTimeout(() => {
+              setNotification(null)
+            }, 5000)
           }
         })
     }
@@ -88,7 +101,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-        <Filter value={search} onChange={handleSearchChange} />
+      <Notification notification={notification} />
+      <Filter value={search} onChange={handleSearchChange} />
       <h2>add new</h2>
       <PersonForm
         onSubmit={addPerson}
@@ -99,6 +113,18 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <Persons persons={personsToShow} onDeleteEntry={deletePerson} />
+    </div>
+  )
+}
+
+const Notification = ({ notification }) => {
+  if (notification === null) {
+    return null
+  }
+
+  return (
+    <div className={notification.type}>
+      {notification.message}
     </div>
   )
 }
