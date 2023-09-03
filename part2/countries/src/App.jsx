@@ -44,15 +44,19 @@ const App = () => {
     }
   }
 
+  const handleShowSelected = (event) => {
+    setCountryToShow(event)
+  }
+
   return (
     <div>
       find countries <input onChange={handleInputChange} />
-      <Display foundCountryNames={ foundCountryNames } countryData={countryData} countryToShow={countryToShow} />
+      <Display foundCountryNames={ foundCountryNames } countryData={countryData} countryToShow={countryToShow} onShowSelected={handleShowSelected} />
     </div>
   )
 }
 
-const Display = ({ foundCountryNames, countryData, countryToShow }) => {
+const Display = ({ foundCountryNames, countryData, countryToShow, onShowSelected }) => {
   if (countryToShow) {
     return (
       <CountryInfo countryData={countryData} />
@@ -61,7 +65,7 @@ const Display = ({ foundCountryNames, countryData, countryToShow }) => {
   if (foundCountryNames) {
     if (foundCountryNames.length <= 10) {
       return (
-        <CountryList countries = {foundCountryNames} />
+        <CountryList countries = {foundCountryNames} onShowSelected={onShowSelected} />
       )
     }
     else {
@@ -75,12 +79,13 @@ const Display = ({ foundCountryNames, countryData, countryToShow }) => {
   else return null
 }
 
-const CountryList = ({ countries }) => {
+const CountryList = ({ countries, onShowSelected }) => {
   return (
     <div>
     {countries.map(country => 
       <div key={countries.indexOf(country)}>
         {country}
+        <button onClick={() => onShowSelected(country)}>show</button>
       </div>
     )}
     </div>
