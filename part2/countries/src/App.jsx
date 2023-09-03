@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react"
 import countries from "./services/countries"
+import weather from "./services/weather"
+import { WeatherDescription } from "./weathercodes"
 
 const App = () => {
   const [ countryNames, setCountryNames ] = useState(null)
   const [ foundCountryNames, setFoundCountryNames ] = useState(null)
   const [ countryToShow, setCountryToShow] = useState(null)
   const [ countryData, setCountryData ] = useState(null)
+  const [ weatherData, setWeatherData ] = useState(null)
 
   useEffect(() => {
     countries
@@ -26,9 +29,21 @@ const App = () => {
     }
   }, [countryToShow])
 
+  useEffect(() => {
+    if (countryData) {
+      const latlong = countryData.capitalInfo.latlng
+      weather
+      .getWeather(latlong[0], latlong[1])
+      .then(data => {
+        setWeatherData(data)
+      })
+    }
+  }, [countryData])
+
   const handleInputChange = (event) => {
     const search = event.target.value
     if (search === '') {
+      setCountryToShow(null)
       setFoundCountryNames(null)
       return
     }
@@ -51,15 +66,18 @@ const App = () => {
   return (
     <div>
       find countries <input onChange={handleInputChange} />
-      <Display foundCountryNames={ foundCountryNames } countryData={countryData} countryToShow={countryToShow} onShowSelected={handleShowSelected} />
+      <Display foundCountryNames={ foundCountryNames } countryToShow={countryToShow} countryData={countryData} weatherData={weatherData} onShowSelected={handleShowSelected} />
     </div>
   )
 }
 
-const Display = ({ foundCountryNames, countryData, countryToShow, onShowSelected }) => {
-  if (countryToShow) {
+const Display = ({ foundCountryNames, countryToShow, countryData, weatherData, onShowSelected }) => {
+  if (countryToShow && countryData && weatherData) {
     return (
-      <CountryInfo countryData={countryData} />
+      <div>
+        <CountryInfo countryData={countryData} />
+        <WeatherInfo weatherData={weatherData} />
+      </div>
     )
   }
   if (foundCountryNames) {
@@ -114,6 +132,22 @@ const CountryInfo = ({ countryData }) => {
         )}
       </ul>
       <img src={flagUrl} alt={flagAlt} />
+    </div>
+  )
+}
+
+const WeatherInfo = ({ weatherData }) => {
+  const capital = weatherData.timezone.match(/\/(.+)/)[1].replaceAll('_', ' ')
+  const temperature = weatherData.current_weather.temperature
+  const windspeed = weatherData.current_weather.windspeed
+  const weathercode = weatherData.current_weather.weathercode
+  return (
+    <div>
+      <h2>Weather in {capital}</h2>
+      <p>temperature {temperature} celsius</p>
+      <p>wind {windspeed} m/s</p>
+      <p><b>{WeatherDescription[weathercode]}</b></p>
+      <a href="https://open-meteo.com/">Weather data by Open-Meteo.com</a>
     </div>
   )
 }
